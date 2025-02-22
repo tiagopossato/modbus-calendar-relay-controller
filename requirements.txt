@@ -1,0 +1,5 @@
+pymodbus==3.7.0
+pylint==3.3.1
+pyserial==3.5
+requests==2.32.3
+python-dotenv==1.0.1
