@@ -51,7 +51,7 @@ def main():
     """
     # Inicializa o cliente Modbus para comunicação TCP
     client = ModbusClient("192.168.0.7", port=502)
-   
+
     # Inicializa o controlador de relés
     relay_controller = RelayController(client, 1)
 

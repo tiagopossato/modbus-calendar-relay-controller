@@ -53,7 +53,7 @@ def main():
     client = ModbusClient(port='COM3')
 
     # Inicializa o controlador de relés utilizando o cliente Modbus
-    relay_controller = RelayController(client)
+    relay_controller = RelayController(client, slave=1)
 
     # Obtém e armazena os estados iniciais dos relés 1 e 2
     relay_1_status = relay_controller.read_relay_state(1)

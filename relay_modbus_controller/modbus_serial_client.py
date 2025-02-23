@@ -52,29 +52,31 @@ class ModbusClient:
         """
         return self.client.connect()
 
-    def read_relay_status(self, relay_number):
+    def read_relay_status(self, relay_number, slave):
         """
         Lê o status de um relé específico.
 
         :param relay_number: Número do relé a ser lido (1 baseado).
+        :param slave: ID do escravo ModBus.
         :return: Estado do relé (True para ligado, False para desligado).
         :raises Exception: Se houver erro na leitura do relé.
         """
-        result = self.client.read_coils(0x0, 8)  # Lê 8 registros (bobinas)
+        result = self.client.read_coils(0x0, 8, slave=slave)  # Lê 8 registros (bobinas)
         if result.isError():
             raise Exception(f"Erro ao ler o status do relé {relay_number}")
         return result.bits[relay_number-1]  # Retorna o valor lido
 
-    def write_coil(self, address, value):
+    def write_coil(self, address, value, slave):
         """
         Escreve um valor (True/False) em uma bobina específica.
 
         :param address: Endereço da bobina (1 baseado).
+        :param slave: ID do escravo ModBus.
         :param value: Valor a ser escrito (True para ligar, False para desligar).
         :return: Resultado da operação de escrita.
         :raises Exception: Se houver erro ao escrever na bobina.
         """
-        result = self.client.write_coil(address-1, value)
+        result = self.client.write_coil(address-1, value, slave=slave)
         if result.isError():
             raise Exception(f"Erro ao escrever o coil no endereço {address}")
         return result

@@ -1,10 +1,18 @@
+"""
+Script para análise de código com Pylint.
+
+Este script percorre os diretórios especificados e também a pasta onde o script está localizado,
+executando o Pylint em todos os arquivos Python encontrados e exibindo os resultados na tela. 
+Para otimizar a execução, o script utiliza paralelização através do ThreadPoolExecutor.
+"""
+
 import subprocess
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def run_pylint(file_path: Path) -> None:
     """
-    Executa o pylint em um arquivo Python específico e exibe o resultado na tela.
+    Executa o Pylint em um arquivo Python específico e exibe o resultado na tela.
     
     :param file_path: Caminho para o arquivo Python a ser verificado.
     """
@@ -17,7 +25,7 @@ def run_pylint(file_path: Path) -> None:
             stderr=subprocess.PIPE,
             text=True
         )
-        # Exibe a saída do pylint
+        # Exibe a saída do Pylint (stdout e stderr) se houver
         if result.stdout:
             print(result.stdout)
         if result.stderr:
@@ -26,14 +34,25 @@ def run_pylint(file_path: Path) -> None:
         print(f"Erro ao executar pylint em {file_path}: {e}")
 
 def main():
+    """
+    Função principal que realiza as seguintes etapas:
+      - Define os diretórios onde os arquivos Python serão verificados.
+      - Coleta todos os arquivos com extensão '.py' de forma recursiva dos diretórios especificados,
+        bem como os arquivos Python localizados na mesma pasta deste script.
+      - Executa o Pylint em cada arquivo de forma paralela utilizando ThreadPoolExecutor.
+    """
     # Lista de diretórios a serem verificados
     directories = ['calendar_integration', 'relay_modbus_controller']
-    
-    # Coleta todos os arquivos .py dos diretórios especificados
+
+    # Coleta todos os arquivos Python dos diretórios especificados
     python_files = []
     for directory in directories:
         python_files.extend(Path(directory).rglob('*.py'))
-    
+
+    # Adiciona todos os arquivos Python que estão na mesma pasta deste script
+    current_dir = Path(__file__).parent
+    python_files.extend(current_dir.glob('*.py'))
+
     # Executa as verificações em paralelo (ajuste o número de workers se necessário)
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(run_pylint, file): file for file in python_files}

@@ -9,7 +9,7 @@ Exemplos de uso:
 # Criando um cliente Modbus RTU e controlando um relé:
 from relay_modbus_controller.modbus_serial_client import ModbusClient as ModbusClientSerial
 modbus_client = ModbusClientSerial(port='/dev/ttyUSB0', baudrate=9600)
-relay_controller = RelayController(modbus_client)
+relay_controller = RelayController(modbus_client, slave=1)
 relay_controller.set_relay_status(True, 1)  # Liga o relé no endereço 1
 
 # Criando um cliente Modbus TCP e controlando um relé:
@@ -18,10 +18,6 @@ modbus_client = ModbusClientTCP(host='192.168.1.100', port=502)
 relay_controller = RelayController(modbus_client, slave=1)
 relay_controller.set_relay_status(False, 1)  # Desliga o relé no endereço 1
 """
-
-from relay_modbus_controller.modbus_serial_client import ModbusClient as ModbusClientSerial
-from relay_modbus_controller.modbus_tcp_client import ModbusClient as ModbusClientTCP
-
 class RelayController:
     """
     Classe para controle de relés via Modbus.
@@ -30,12 +26,12 @@ class RelayController:
     através de um cliente Modbus, que pode ser serial (RTU) ou TCP/IP.
     """
 
-    def __init__(self, modbus_client, slave=None):
+    def __init__(self, modbus_client, slave):
         """
         Inicializa o controlador de relés.
 
         :param modbus_client: Instância de um cliente Modbus (RTU ou TCP).
-        :param slave: ID do escravo Modbus (apenas para Modbus TCP, opcional).
+        :param slave: ID do escravo Modbus.
         """
         self.modbus_client = modbus_client
         self.slave = slave
@@ -62,10 +58,7 @@ class RelayController:
         :param relay_address: Endereço do relé no barramento Modbus.
         :return: Estado atualizado do relé após a operação.
         """
-        if isinstance(self.modbus_client, ModbusClientSerial):
-            self.modbus_client.write_coil(relay_address, True)
-        elif isinstance(self.modbus_client, ModbusClientTCP):
-            self.modbus_client.write_coil(relay_address, True, self.slave)
+        self.modbus_client.write_coil(relay_address, True, self.slave)
         return self.read_relay_state(relay_address)
 
     def turn_off_relay(self, relay_address):
@@ -75,10 +68,7 @@ class RelayController:
         :param relay_address: Endereço do relé no barramento Modbus.
         :return: Estado atualizado do relé após a operação.
         """
-        if isinstance(self.modbus_client, ModbusClientSerial):
-            self.modbus_client.write_coil(relay_address, False)
-        elif isinstance(self.modbus_client, ModbusClientTCP):
-            self.modbus_client.write_coil(relay_address, False, self.slave)
+        self.modbus_client.write_coil(relay_address, False, self.slave)
         return self.read_relay_state(relay_address)
 
     def read_relay_state(self, relay_address):
@@ -88,10 +78,4 @@ class RelayController:
         :param relay_address: Endereço do relé no barramento Modbus.
         :return: Estado atual do relé (True para ligado, False para desligado).
         """
-        status = None
-        if isinstance(self.modbus_client, ModbusClientSerial):
-            status = self.modbus_client.read_relay_status(relay_address)
-        if isinstance(self.modbus_client, ModbusClientTCP):
-            status = self.modbus_client.read_relay_status(relay_address, self.slave)
-
-        return status
+        return self.modbus_client.read_relay_status(relay_address, self.slave)
