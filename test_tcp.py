@@ -49,13 +49,24 @@ def main():
 
             # Liga sequencialmente os relés de 1 a 4 e registra o estado
             for i in range(1, 5):
-                status_relay = relay_controller.set_relay_status(True, i)
+                status_relay = None
+                try:
+                  while status_relay is None:
+                    status_relay = relay_controller.set_relay_status(True, i)
+                except Exception as e:
+                    print(e)
+                    
                 logger.info("Estado do Relé %s: %s", i, 'Ligado' if status_relay else 'Desligado')
                 sleep(0.1)
 
             # Desliga sequencialmente os relés de 1 a 4 e registra o estado
             for i in range(1, 5):
-                status_relay = relay_controller.set_relay_status(False, i)
+                status_relay = None
+                try:
+                  while status_relay is None:
+                    status_relay = relay_controller.set_relay_status(False, i)
+                except Exception as e:
+                    print(e)
                 logger.info("Estado do Relé %s: %s", i, 'Ligado' if status_relay else 'Desligado')
                 sleep(0.1)
 
